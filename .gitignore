@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Local Chromium/depot_tools workspaces
+chromium/
+chromium-src/
+.depot_tools/
+
+# Build output if tools are ever run from this repository
+out/
+build/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Local runtime state
+*.log
+*.pid
+.env
+.env.*
+
+# Aleo/Leo generated artifacts
+aleo/**/build/
+aleo/**/.aleo/
