@@ -18,7 +18,14 @@ PrivateComputeResult ExecuteSync(DeterministicPrivateComputeProvider* provider,
           [](std::optional<PrivateComputeResult>* out,
              PrivateComputeResult value) { *out = std::move(value); },
           &result));
-  EXPECT_TRUE(result.has_value());
+
+  if (!result) {
+    ADD_FAILURE() << "PrivateComputeProvider did not complete synchronously in test";
+    PrivateComputeResult fallback;
+    fallback.error = "missing_callback";
+    return fallback;
+  }
+
   return std::move(*result);
 }
 
@@ -26,11 +33,11 @@ TEST(DeterministicPrivateComputeProviderTest, FrequencyCapAllowsBelowLimit) {
   DeterministicPrivateComputeProvider provider;
   PrivateComputeRequest request;
   request.capability = PrivateComputeCapability::kFrequencyCap;
-  request.input = FrequencyCapInput{
-      .campaign_commitment = 42,
-      .prior_impressions = 2,
-      .maximum_impressions = 3,
-  };
+  FrequencyCapInput input;
+  input.campaign_commitment = 42;
+  input.prior_impressions = 2;
+  input.maximum_impressions = 3;
+  request.input = input;
 
   PrivateComputeResult result = ExecuteSync(&provider, std::move(request));
 
@@ -43,11 +50,11 @@ TEST(DeterministicPrivateComputeProviderTest, FrequencyCapBlocksAtLimit) {
   DeterministicPrivateComputeProvider provider;
   PrivateComputeRequest request;
   request.capability = PrivateComputeCapability::kFrequencyCap;
-  request.input = FrequencyCapInput{
-      .campaign_commitment = 42,
-      .prior_impressions = 3,
-      .maximum_impressions = 3,
-  };
+  FrequencyCapInput input;
+  input.campaign_commitment = 42;
+  input.prior_impressions = 3;
+  input.maximum_impressions = 3;
+  request.input = input;
 
   PrivateComputeResult result = ExecuteSync(&provider, std::move(request));
 
@@ -59,10 +66,10 @@ TEST(DeterministicPrivateComputeProviderTest, RejectsMismatchedTypedInput) {
   DeterministicPrivateComputeProvider provider;
   PrivateComputeRequest request;
   request.capability = PrivateComputeCapability::kFrequencyCap;
-  request.input = TelemetryBucketInput{
-      .private_event_count = 8,
-      .bucket_width = 5,
-  };
+  TelemetryBucketInput input;
+  input.private_event_count = 8;
+  input.bucket_width = 5;
+  request.input = input;
 
   PrivateComputeResult result = ExecuteSync(&provider, std::move(request));
 
@@ -74,10 +81,10 @@ TEST(DeterministicPrivateComputeProviderTest, TelemetryReturnsCoarseBucket) {
   DeterministicPrivateComputeProvider provider;
   PrivateComputeRequest request;
   request.capability = PrivateComputeCapability::kTelemetryBucket;
-  request.input = TelemetryBucketInput{
-      .private_event_count = 18,
-      .bucket_width = 5,
-  };
+  TelemetryBucketInput input;
+  input.private_event_count = 18;
+  input.bucket_width = 5;
+  request.input = input;
 
   PrivateComputeResult result = ExecuteSync(&provider, std::move(request));
 
@@ -90,10 +97,10 @@ TEST(DeterministicPrivateComputeProviderTest, PersonalizationOnlyReturnsMatch) {
   DeterministicPrivateComputeProvider provider;
   PrivateComputeRequest request;
   request.capability = PrivateComputeCapability::kPersonalizationMatch;
-  request.input = PersonalizationMatchInput{
-      .requested_segment_commitment = 77,
-      .local_segment_commitment = 77,
-  };
+  PersonalizationMatchInput input;
+  input.requested_segment_commitment = 77;
+  input.local_segment_commitment = 77;
+  request.input = input;
 
   PrivateComputeResult result = ExecuteSync(&provider, std::move(request));
 
