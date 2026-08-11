@@ -8,7 +8,6 @@ of cloning the GitHub mirror. It does not modify the Privy repository itself.
 from __future__ import annotations
 
 import argparse
-import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -22,6 +21,16 @@ def run(args: list[str], cwd: Path | None = None) -> None:
     printable = " ".join(args)
     print(f"+ {printable}")
     subprocess.run(args, cwd=cwd, check=True)
+
+
+def output(args: list[str], cwd: Path) -> str:
+    return subprocess.run(
+        args,
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
 
 
 def require_tool(name: str) -> None:
@@ -39,29 +48,19 @@ def read_version() -> str:
     return version
 
 
-def assert_clean_checkout(src: Path) -> None:
-    status = subprocess.run(
-        ["git", "status", "--porcelain"],
-        cwd=src,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    if status:
-        raise SystemExit(
-            "Chromium checkout contains local changes. Refusing to change the "
-            "upstream revision. Commit/stash them or use a clean workspace."
-        )
+def is_dirty(src: Path) -> bool:
+    return bool(output(["git", "status", "--porcelain"], cwd=src))
 
 
-def sync_overlay(src: Path) -> None:
-    """Copy Privy-owned Chromium source overlays into the checkout.
-
-    Only explicitly mapped directories are copied. We never mirror the whole
-    repository into Chromium.
-    """
+def sync_overlays(src: Path) -> None:
+    """Copy Privy-owned source overlays into the Chromium checkout."""
     mappings = [
-        (REPO_ROOT / "components" / "privy_privacy", src / "components" / "privy_privacy"),
+        (
+            REPO_ROOT / "components" / "privy_privacy",
+            src / "components" / "privy_privacy",
+        ),
+        # Files in chromium_overlays/ are laid out relative to Chromium //.
+        (REPO_ROOT / "chromium_overlays", src),
     ]
 
     for source, destination in mappings:
@@ -100,23 +99,46 @@ def main() -> int:
     src = workspace / "src"
     workspace.mkdir(parents=True, exist_ok=True)
 
-    if not (src / ".git").exists():
+    fresh_checkout = not (src / ".git").exists()
+    if fresh_checkout:
         if any(workspace.iterdir()):
             raise SystemExit(
                 f"{workspace} is not empty and does not contain a Chromium src checkout."
             )
         run(["fetch", "--nohooks", "chromium"], cwd=workspace)
-    else:
-        assert_clean_checkout(src)
 
-    # Stable Chrome/Chromium releases are tagged with their dotted version.
+    # Resolve the requested tag before deciding whether an existing dirty tree
+    # is safe to reuse. A dirty tree is expected after Privy patches/overlays.
     run(["git", "fetch", "--tags", "origin"], cwd=src)
-    run(["git", "checkout", "--detach", version], cwd=src)
+    desired_commit = output(["git", "rev-parse", f"{version}^{{commit}}"], cwd=src)
+    current_commit = output(["git", "rev-parse", "HEAD"], cwd=src)
+    dirty = is_dirty(src)
 
-    if not args.skip_sync:
-        run(["gclient", "sync", "--with_branch_heads", "--with_tags"], cwd=workspace)
+    revision_changed = current_commit != desired_commit
+    if revision_changed and dirty:
+        raise SystemExit(
+            "The pinned Chromium revision changed, but the existing checkout "
+            "contains local/Privy changes. Rebase or reset that workspace "
+            "explicitly before switching Chromium revisions."
+        )
 
-    sync_overlay(src)
+    if revision_changed:
+        run(["git", "checkout", "--detach", version], cwd=src)
+        dirty = False
+
+    # `gclient sync` is needed for a fresh/revision-changed checkout. On an
+    # already-prepared dirty checkout, rerunning it can fight the Privy patch
+    # stack, so a normal bootstrap refresh leaves dependencies untouched.
+    should_sync = not args.skip_sync and (fresh_checkout or revision_changed or not dirty)
+    if should_sync:
+        run(
+            ["gclient", "sync", "--with_branch_heads", "--with_tags"],
+            cwd=workspace,
+        )
+    elif not args.skip_sync and dirty:
+        print("= existing Privy-patched checkout detected; skipping gclient sync")
+
+    sync_overlays(src)
 
     if not args.skip_patches:
         run(
@@ -132,7 +154,7 @@ def main() -> int:
     print()
     print(f"Privy Chromium workspace prepared at: {src}")
     print(f"Pinned Chromium version: {version}")
-    print("Next: configure GN args, build chrome, then launch the Privy binary.")
+    print("Next: configure GN args, build Privy tests, then build the browser.")
     return 0
 
 
