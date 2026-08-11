@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Privy core tests, run them, and optionally build Chromium."""
+"""Build Privy core/service targets, run tests, optionally build Chromium."""
 
 from __future__ import annotations
 
@@ -41,17 +41,24 @@ def main() -> int:
         raise SystemExit(f"Not a Chromium checkout: {src}")
 
     test_target = "components/privy_privacy:privy_privacy_unittests"
-    targets = [test_target]
+    service_target = "chrome/browser/privy/privacy:privacy"
+    targets = [test_target, service_target]
     if args.browser:
         targets.append("chrome")
 
     run(["autoninja", "-C", args.out, *targets], cwd=src)
 
     if not args.skip_tests:
-        binary_name = "privy_privacy_unittests.exe" if sys.platform == "win32" else "privy_privacy_unittests"
+        binary_name = (
+            "privy_privacy_unittests.exe"
+            if sys.platform == "win32"
+            else "privy_privacy_unittests"
+        )
         test_binary = src / args.out / binary_name
         if not test_binary.exists():
-            raise SystemExit(f"Expected test binary was not produced: {test_binary}")
+            raise SystemExit(
+                f"Expected test binary was not produced: {test_binary}"
+            )
         run([str(test_binary)], cwd=src)
 
     return 0
