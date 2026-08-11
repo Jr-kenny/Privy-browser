@@ -89,6 +89,11 @@ def main() -> int:
         action="store_true",
         help="copy Privy source overlays but do not apply the patch series",
     )
+    parser.add_argument(
+        "--no-history",
+        action="store_true",
+        help="use shallow Chromium and dependency checkouts",
+    )
     args = parser.parse_args()
 
     for tool in ("git", "fetch", "gclient"):
@@ -105,11 +110,27 @@ def main() -> int:
             raise SystemExit(
                 f"{workspace} is not empty and does not contain a Chromium src checkout."
             )
-        run(["fetch", "--nohooks", "chromium"], cwd=workspace)
+        fetch_args = ["fetch"]
+        if args.no_history:
+            fetch_args.append("--no-history")
+        fetch_args.extend(["--nohooks", "chromium"])
+        run(fetch_args, cwd=workspace)
 
     # Resolve the requested tag before deciding whether an existing dirty tree
     # is safe to reuse. A dirty tree is expected after Privy patches/overlays.
-    run(["git", "fetch", "--tags", "origin"], cwd=src)
+    if args.no_history:
+        run(
+            [
+                "git",
+                "fetch",
+                "--depth=1",
+                "origin",
+                f"refs/tags/{version}:refs/tags/{version}",
+            ],
+            cwd=src,
+        )
+    else:
+        run(["git", "fetch", "--tags", "origin"], cwd=src)
     desired_commit = output(["git", "rev-parse", f"{version}^{{commit}}"], cwd=src)
     current_commit = output(["git", "rev-parse", "HEAD"], cwd=src)
     dirty = is_dirty(src)
@@ -131,10 +152,10 @@ def main() -> int:
     # stack, so a normal bootstrap refresh leaves dependencies untouched.
     should_sync = not args.skip_sync and (fresh_checkout or revision_changed or not dirty)
     if should_sync:
-        run(
-            ["gclient", "sync", "--with_branch_heads", "--with_tags"],
-            cwd=workspace,
-        )
+        sync_args = ["gclient", "sync", "--with_branch_heads", "--with_tags"]
+        if args.no_history:
+            sync_args.append("--no-history")
+        run(sync_args, cwd=workspace)
     elif not args.skip_sync and dirty:
         print("= existing Privy-patched checkout detected; skipping gclient sync")
 

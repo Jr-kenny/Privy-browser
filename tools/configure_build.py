@@ -33,6 +33,7 @@ def main() -> int:
         "symbol_level=1",
         "blink_symbol_level=0",
         "v8_symbol_level=0",
+        'root_extra_deps=["//components/privy_privacy:privy_privacy_unittests","//chrome/browser/privy/privacy:privy_privacy_service_unittests"]',
     ]
 
     command = ["gn", "gen", args.out, "--args=" + " ".join(gn_args)]
