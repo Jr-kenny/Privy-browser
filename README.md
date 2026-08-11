@@ -49,29 +49,55 @@ Privy-browser/
 ├── server/
 ├── tools/
 │   ├── bootstrap.py
-│   └── apply_patches.py
+│   ├── apply_patches.py
+│   ├── configure_build.py
+│   └── build.py
 └── docs/
     ├── ARCHITECTURE.md
     ├── PRIVACY_MODEL.md
     ├── THREAT_MODEL.md
     ├── ALEO_RUNTIME.md
     ├── CHROMIUM_INTEGRATION.md
+    ├── REFERENCE_RESEARCH.md
+    ├── CODEX_HANDOFF.md
     └── SERVER_MODE.md
 ```
 
 ## Upstream baseline
 
-The initial baseline is Chromium **150.0.7871.186**, the latest broadly released Linux stable build verified when this repository was initialized. Upgrades are expected; the patch stack is deliberately kept separate to make rebasing routine.
+The initial baseline is Chromium **151.0.7922.108**. The exact Chromium release tag is pinned in `config/chromium.version`; upgrades are expected and the patch stack is deliberately kept separate to make rebasing routine.
 
-## Current state
+## Bootstrap
 
-The repository is in architecture/bootstrap stage. The first implementation milestone is a locally buildable Chromium derivative with:
+Chromium uses `depot_tools`. With `fetch`, `gclient`, `gn`, and `autoninja` available in `PATH`:
 
-- Privy branding;
-- a profile-scoped `PrivyPrivacyService`;
-- a browser-native privacy decision engine;
-- an internal private-compute bridge;
-- one end-to-end Aleo-backed private telemetry primitive;
-- a visible privacy activity surface in the browser UI.
+```bash
+python3 tools/bootstrap.py --workspace ~/privy-chromium
+python3 tools/configure_build.py --chromium-src ~/privy-chromium/src
+python3 tools/build.py --chromium-src ~/privy-chromium/src
+```
 
-See `AGENTS.md` for implementation constraints and `docs/ARCHITECTURE.md` for the system design.
+The first build target is the Privy core/unit-test target. Add `--browser` to the final command only after that target is green.
+
+## Current implementation
+
+Already in the repository:
+
+- reproducible pinned Chromium checkout and patch tooling;
+- provider-neutral privacy request/decision types;
+- deterministic, independently testable privacy policy engine;
+- fail-closed handling for behavioral data when private compute is unavailable;
+- typed `PrivateComputeProvider` boundary;
+- deterministic private-compute provider for architecture/integration testing;
+- unit tests for policy and compute behavior;
+- architecture, privacy, threat-model, Chromium integration, Aleo runtime, server-mode, reference, and Codex handoff documents.
+
+Next browser-level milestone:
+
+- `PrivyPrivacyService` as a profile-keyed Chromium service;
+- local privacy activity model;
+- `chrome://privacy`;
+- first real browser-owned `frequency_cap` request path;
+- Aleo provider behind the existing private-compute interface.
+
+See `AGENTS.md` for implementation constraints and `docs/CODEX_HANDOFF.md` for the ordered continuation plan.
