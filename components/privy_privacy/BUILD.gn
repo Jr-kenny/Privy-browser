@@ -1,3 +1,5 @@
+import("//testing/test.gni")
+
 # Privy-owned Chromium component. This directory is copied into
 # //components/privy_privacy by tools/bootstrap.py.
 
@@ -19,9 +21,7 @@ source_set("core") {
   ]
 }
 
-source_set("unit_tests") {
-  testonly = true
-
+test("privy_privacy_unittests") {
   sources = [
     "compute/deterministic_private_compute_provider_unittest.cc",
     "core/privacy_policy_engine_unittest.cc",
@@ -29,6 +29,7 @@ source_set("unit_tests") {
 
   deps = [
     ":core",
+    "//base/test:run_all_unittests",
     "//base/test:test_support",
     "//testing/gtest",
     "//url",
