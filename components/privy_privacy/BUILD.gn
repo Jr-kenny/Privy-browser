@@ -1,0 +1,31 @@
+# Privy-owned Chromium component. This directory is copied into
+# //components/privy_privacy by tools/bootstrap.py.
+
+source_set("core") {
+  sources = [
+    "core/privacy_policy_engine.cc",
+    "core/privacy_policy_engine.h",
+    "core/privacy_types.cc",
+    "core/privacy_types.h",
+    "compute/private_compute_provider.h",
+    "compute/private_compute_types.h",
+  ]
+
+  deps = [
+    "//base",
+    "//url",
+  ]
+}
+
+source_set("unit_tests") {
+  testonly = true
+
+  sources = [ "core/privacy_policy_engine_unittest.cc" ]
+
+  deps = [
+    ":core",
+    "//base/test:test_support",
+    "//testing/gtest",
+    "//url",
+  ]
+}
