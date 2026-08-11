@@ -27,7 +27,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-tests",
         action="store_true",
-        help="build the Privy unit test binary but do not execute it",
+        help="build Privy test binaries but do not execute them",
     )
     args = parser.parse_args()
 
@@ -40,26 +40,28 @@ def main() -> int:
     if not (src / ".git").exists():
         raise SystemExit(f"Not a Chromium checkout: {src}")
 
-    test_target = "components/privy_privacy:privy_privacy_unittests"
-    service_target = "chrome/browser/privy/privacy:privacy"
-    targets = [test_target, service_target]
+    test_targets = [
+        "components/privy_privacy:privy_privacy_unittests",
+        "chrome/browser/privy/privacy:privy_privacy_service_unittests",
+    ]
+    targets = list(test_targets)
     if args.browser:
         targets.append("chrome")
 
     run(["autoninja", "-C", args.out, *targets], cwd=src)
 
     if not args.skip_tests:
-        binary_name = (
-            "privy_privacy_unittests.exe"
-            if sys.platform == "win32"
-            else "privy_privacy_unittests"
-        )
-        test_binary = src / args.out / binary_name
-        if not test_binary.exists():
-            raise SystemExit(
-                f"Expected test binary was not produced: {test_binary}"
-            )
-        run([str(test_binary)], cwd=src)
+        suffix = ".exe" if sys.platform == "win32" else ""
+        for name in (
+            "privy_privacy_unittests",
+            "privy_privacy_service_unittests",
+        ):
+            test_binary = src / args.out / f"{name}{suffix}"
+            if not test_binary.exists():
+                raise SystemExit(
+                    f"Expected test binary was not produced: {test_binary}"
+                )
+            run([str(test_binary)], cwd=src)
 
     return 0
 
