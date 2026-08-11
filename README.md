@@ -33,7 +33,7 @@ Instead of letting websites, analytics scripts, advertisers, and extensions coll
 
 ## Repository model
 
-This repository intentionally does **not** vendor the entire Chromium source tree. It owns Privy's code, patches, programs, documentation, and build tooling. A bootstrap step checks out a pinned upstream Chromium release and applies the Privy patch stack.
+This repository intentionally does **not** vendor the entire Chromium source tree. It owns Privy's code, source overlays, patches, programs, documentation, and build tooling. A bootstrap step checks out a pinned upstream Chromium release and applies the Privy overlay/patch stack.
 
 ```text
 Privy-browser/
@@ -42,6 +42,8 @@ Privy-browser/
 │   └── chromium.version
 ├── components/
 │   └── privy_privacy/
+├── chromium_overlays/
+│   └── chrome/browser/privy/privacy/
 ├── aleo/
 │   └── programs/
 ├── patches/
@@ -65,7 +67,7 @@ Privy-browser/
 
 ## Upstream baseline
 
-The initial baseline is Chromium **151.0.7922.108**. The exact Chromium release tag is pinned in `config/chromium.version`; upgrades are expected and the patch stack is deliberately kept separate to make rebasing routine.
+The initial baseline is Chromium **151.0.7922.108**. The exact Chromium release tag is pinned in `config/chromium.version`; upgrades are expected and the overlay/patch stack is deliberately kept separate to make rebasing routine.
 
 ## Bootstrap
 
@@ -77,24 +79,28 @@ python3 tools/configure_build.py --chromium-src ~/privy-chromium/src
 python3 tools/build.py --chromium-src ~/privy-chromium/src
 ```
 
-The first build target is the Privy core/unit-test target. Add `--browser` to the final command only after that target is green.
+The build helper compiles and runs both the provider-neutral core tests and the profile-scoped browser service tests. Add `--browser` only after those targets are green.
 
 ## Current implementation
 
 Already in the repository:
 
-- reproducible pinned Chromium checkout and patch tooling;
+- reproducible pinned Chromium checkout, overlay, and patch tooling;
 - provider-neutral privacy request/decision types;
 - deterministic, independently testable privacy policy engine;
 - fail-closed handling for behavioral data when private compute is unavailable;
 - typed `PrivateComputeProvider` boundary;
 - deterministic private-compute provider for architecture/integration testing;
-- unit tests for policy and compute behavior;
+- profile-scoped `PrivyPrivacyService` browser overlay;
+- `ProfileKeyedServiceFactory` configuration with independent off-the-record instances;
+- service dispatch that derives compute availability itself rather than trusting page input;
+- fail-closed handling when a compute provider fails;
+- directly runnable unit-test binaries for the core and browser service;
 - architecture, privacy, threat-model, Chromium integration, Aleo runtime, server-mode, reference, and Codex handoff documents.
 
 Next browser-level milestone:
 
-- `PrivyPrivacyService` as a profile-keyed Chromium service;
+- compile/validate the overlays against the pinned M151 checkout;
 - local privacy activity model;
 - `chrome://privacy`;
 - first real browser-owned `frequency_cap` request path;
