@@ -3,12 +3,14 @@
 
 source_set("core") {
   sources = [
+    "compute/deterministic_private_compute_provider.cc",
+    "compute/deterministic_private_compute_provider.h",
+    "compute/private_compute_provider.h",
+    "compute/private_compute_types.h",
     "core/privacy_policy_engine.cc",
     "core/privacy_policy_engine.h",
     "core/privacy_types.cc",
     "core/privacy_types.h",
-    "compute/private_compute_provider.h",
-    "compute/private_compute_types.h",
   ]
 
   deps = [
@@ -20,7 +22,10 @@ source_set("core") {
 source_set("unit_tests") {
   testonly = true
 
-  sources = [ "core/privacy_policy_engine_unittest.cc" ]
+  sources = [
+    "compute/deterministic_private_compute_provider_unittest.cc",
+    "core/privacy_policy_engine_unittest.cc",
+  ]
 
   deps = [
     ":core",
