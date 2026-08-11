@@ -1,0 +1,16 @@
+source_set("privacy") {
+  sources = [
+    "privy_privacy_service.cc",
+    "privy_privacy_service.h",
+    "privy_privacy_service_factory.cc",
+    "privy_privacy_service_factory.h",
+  ]
+
+  deps = [
+    "//base",
+    "//chrome/browser/profiles:profile",
+    "//components/keyed_service/core",
+    "//components/privy_privacy:core",
+    "//content/public/browser",
+  ]
+}
