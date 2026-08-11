@@ -15,6 +15,8 @@ const char* PrivacyActionToString(PrivacyAction action) {
     case PrivacyAction::kComputePrivately:
       return "compute_privately";
   }
+
+  return "unknown";
 }
 
 const char* PrivacySurfaceToString(PrivacySurface surface) {
@@ -36,6 +38,8 @@ const char* PrivacySurfaceToString(PrivacySurface surface) {
     case PrivacySurface::kFingerprinting:
       return "fingerprinting";
   }
+
+  return "unknown";
 }
 
 }  // namespace privy
