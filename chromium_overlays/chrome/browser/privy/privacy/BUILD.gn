@@ -1,3 +1,5 @@
+import("//testing/test.gni")
+
 source_set("privacy") {
   sources = [
     "privy_privacy_service.cc",
@@ -12,5 +14,18 @@ source_set("privacy") {
     "//components/keyed_service/core",
     "//components/privy_privacy:core",
     "//content/public/browser",
+  ]
+}
+
+test("privy_privacy_service_unittests") {
+  sources = [ "privy_privacy_service_unittest.cc" ]
+
+  deps = [
+    ":privacy",
+    "//base/test:run_all_unittests",
+    "//base/test:test_support",
+    "//components/privy_privacy:core",
+    "//testing/gtest",
+    "//url",
   ]
 }
