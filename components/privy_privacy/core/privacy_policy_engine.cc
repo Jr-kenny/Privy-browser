@@ -4,10 +4,6 @@ namespace privy {
 
 PrivacyDecision PrivacyPolicyEngine::Evaluate(
     const PrivacyRequest& request) const {
-  if (request.requester_type == RequesterType::kBrowser) {
-    return {PrivacyAction::kAllow, "browser_internal"};
-  }
-
   if (request.surface == PrivacySurface::kFingerprinting) {
     return {PrivacyAction::kSanitize, "reduce_fingerprinting_surface"};
   }
@@ -39,6 +35,10 @@ PrivacyDecision PrivacyPolicyEngine::Evaluate(
     // sending raw behavioral inputs to the requester.
     return {PrivacyAction::kBlock,
             "behavioral_data_private_compute_unavailable"};
+  }
+
+  if (request.requester_type == RequesterType::kBrowser) {
+    return {PrivacyAction::kAllow, "browser_internal"};
   }
 
   return {PrivacyAction::kAllow, "no_privacy_policy_override"};

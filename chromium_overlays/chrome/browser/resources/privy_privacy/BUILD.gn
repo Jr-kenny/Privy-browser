@@ -1,0 +1,12 @@
+# Copyright 2026 The Privy Browser Authors
+
+import("//ui/webui/resources/tools/build_webui.gni")
+
+build_webui("resources") {
+  grd_prefix = "privy_privacy"
+  static_files = [
+    "app.js",
+    "privacy.html",
+  ]
+  webui_context_type = "trusted"
+}

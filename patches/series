@@ -3,4 +3,6 @@
 # Keep patches small and topic-specific. Example:
 # branding/0001-privy-branding.patch
 # core/0001-register-privy-privacy-service.patch
-# ui/0001-add-privacy-center.patch
+core/0001-register-privy-privacy-service.patch
+ui/0001-add-privacy-center.patch
+ui/0002-privacy-center-browser-test.patch

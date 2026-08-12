@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "base/functional/callback.h"
+
 namespace privy {
 namespace {
 

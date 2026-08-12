@@ -25,6 +25,19 @@ TEST(PrivacyPolicyEngineTest, UsesPrivateComputeForBehavioralTelemetry) {
             PrivacyAction::kComputePrivately);
 }
 
+TEST(PrivacyPolicyEngineTest, BrowserFrequencyRequestUsesPrivateCompute) {
+  PrivacyRequest request;
+  request.requester_type = RequesterType::kBrowser;
+  request.surface = PrivacySurface::kFrequencyCap;
+  request.contains_behavioral_data = true;
+  request.supports_private_compute = true;
+
+  PrivacyDecision decision = PrivacyPolicyEngine().Evaluate(request);
+
+  EXPECT_EQ(decision.action, PrivacyAction::kComputePrivately);
+  EXPECT_EQ(decision.reason, "behavioral_data_has_private_compute_path");
+}
+
 TEST(PrivacyPolicyEngineTest, FailsClosedWhenPrivateComputeUnavailable) {
   PrivacyPolicyEngine engine;
   auto request = BaseSiteRequest(PrivacySurface::kTelemetry);

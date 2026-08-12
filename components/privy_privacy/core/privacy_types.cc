@@ -42,4 +42,17 @@ const char* PrivacySurfaceToString(PrivacySurface surface) {
   return "unknown";
 }
 
+const char* RequesterTypeToString(RequesterType type) {
+  switch (type) {
+    case RequesterType::kSite:
+      return "site";
+    case RequesterType::kExtension:
+      return "extension";
+    case RequesterType::kBrowser:
+      return "browser";
+  }
+
+  return "unknown";
+}
+
 }  // namespace privy

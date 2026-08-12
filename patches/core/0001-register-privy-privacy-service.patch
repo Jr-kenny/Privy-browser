@@ -1,0 +1,29 @@
+diff --git a/chrome/browser/profiles/BUILD.gn b/chrome/browser/profiles/BUILD.gn
+--- a/chrome/browser/profiles/BUILD.gn
++++ b/chrome/browser/profiles/BUILD.gn
+@@ -706,6 +706,7 @@ source_set("profiles_extra_parts_impl") {
+     "//chrome/browser/private_ai",
+     "//chrome/browser/private_insights",
+     "//chrome/browser/private_verification_tokens",
++    "//chrome/browser/privy/privacy:factory",
+     "//chrome/browser/push_messaging",
+     "//chrome/browser/reading_list",
+     "//chrome/browser/reduce_accept_language",
+diff --git a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
+--- a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
++++ b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
+@@ -201,6 +201,7 @@
+ #include "chrome/browser/private_ai/private_ai_service_factory.h"
+ #include "chrome/browser/private_insights/private_insights_service_factory.h"
+ #include "chrome/browser/private_verification_tokens/private_verification_tokens_service_factory.h"
++#include "chrome/browser/privy/privacy/privy_privacy_service_factory.h"
+ #include "chrome/browser/profile_resetter/triggered_profile_resetter_factory.h"
+ #include "chrome/browser/profiles/batch_upload/batch_upload_service_factory.h"
+ #include "chrome/browser/profiles/renderer_updater_factory.h"
+@@ -1179,5 +1179,6 @@
+ #endif
+   private_insights::PrivateInsightsServiceFactory::GetInstance();
++  privy::PrivyPrivacyServiceFactory::GetInstance();
+   ProfileMetricsServiceFactory::GetInstance();
+ #if BUILDFLAG(ENABLE_WEBUI_NTP)
+   DriveServiceFactory::GetInstance();

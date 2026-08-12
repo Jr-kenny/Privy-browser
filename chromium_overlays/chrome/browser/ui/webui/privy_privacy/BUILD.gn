@@ -1,0 +1,40 @@
+# Copyright 2026 The Privy Browser Authors
+
+source_set("privy_privacy") {
+  sources = [
+    "privy_privacy_ui.cc",
+    "privy_privacy_ui.h",
+  ]
+
+  public_deps = [
+    "//chrome/common",
+    "//content/public/browser",
+  ]
+
+  deps = [
+    "//base",
+    "//chrome/browser/privy/privacy:factory",
+    "//chrome/browser/privy/privacy:privacy",
+    "//chrome/browser/profiles:profile",
+    "//chrome/browser/resources/privy_privacy:resources",
+    "//components/privy_privacy:core",
+    "//content/public/common",
+    "//ui/webui",
+    "//url",
+  ]
+}
+
+if (!is_android) {
+  source_set("browser_tests") {
+    testonly = true
+    defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
+    sources = [ "privy_privacy_ui_browsertest.cc" ]
+
+    deps = [
+      ":privy_privacy",
+      "//chrome/test:test_support",
+      "//chrome/test:test_support_ui",
+      "//content/test:test_support",
+    ]
+  }
+}

@@ -64,6 +64,7 @@ struct PrivacyDecision {
 
 const char* PrivacyActionToString(PrivacyAction action);
 const char* PrivacySurfaceToString(PrivacySurface surface);
+const char* RequesterTypeToString(RequesterType type);
 
 }  // namespace privy
 

@@ -1,0 +1,52 @@
+diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
+--- a/chrome/browser/ui/webui/BUILD.gn
++++ b/chrome/browser/ui/webui/BUILD.gn
+@@ -93,6 +93,7 @@ source_set("configs") {
+     "//chrome/browser/ui/webui/policy",
+     "//chrome/browser/ui/webui/predictors",
+     "//chrome/browser/ui/webui/private_ai_internals",
++    "//chrome/browser/ui/webui/privy_privacy",
+     "//chrome/browser/ui/webui/regional_capabilities_internals",
+     "//chrome/browser/ui/webui/saved_tab_groups_unsupported",
+     "//chrome/browser/ui/webui/segmentation_internals",
+diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
+--- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
++++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
+@@ -49,5 +49,6 @@
+ #include "chrome/browser/ui/webui/policy/policy_ui.h"
+ #include "chrome/browser/ui/webui/predictors/predictors_ui.h"
++#include "chrome/browser/ui/webui/privy_privacy/privy_privacy_ui.h"
+ #include "chrome/browser/ui/webui/regional_capabilities_internals/regional_capabilities_internals_ui.h"
+ #include "chrome/browser/ui/webui/saved_tab_groups_unsupported/saved_tab_groups_unsupported_ui.h"
+ #include "chrome/browser/ui/webui/segmentation_internals/segmentation_internals_ui.h"
+@@ -297,6 +297,7 @@ void RegisterChromeWebUIConfigs() {
+   map.AddWebUIConfig(std::make_unique<PersonalContextInternalsUIConfig>());
+   map.AddWebUIConfig(std::make_unique<PolicyUIConfig>());
+   map.AddWebUIConfig(std::make_unique<PredictorsUIConfig>());
++  map.AddWebUIConfig(std::make_unique<PrivyPrivacyUIConfig>());
+   map.AddWebUIConfig(
+       std::make_unique<private_ai::PrivateAiInternalsUIConfig>());
+   map.AddWebUIConfig(
+diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
+--- a/chrome/common/webui_url_constants.h
++++ b/chrome/common/webui_url_constants.h
+@@ -284,6 +284,7 @@ inline constexpr char kChromeUIPolicyURL[] = "chrome://policy/";
+ inline constexpr char kChromeUIPredictorsHost[] = "predictors";
+ inline constexpr char kChromeUIPrefsInternalsHost[] = "prefs-internals";
+ inline constexpr char kChromeUIPrintURL[] = "chrome://print/";
++inline constexpr char kChromeUIPrivyPrivacyHost[] = "privacy";
+ inline constexpr char16_t kChromeUIPrivacySandboxFledgeURL[] =
+     u"chrome://settings/adPrivacy/sites";
+ inline constexpr char16_t kChromeUIPrivacySandboxManageTopicsLearnMoreURL[] =
+diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
+--- a/chrome/common/webui_url_constants.cc
++++ b/chrome/common/webui_url_constants.cc
+@@ -187,6 +187,7 @@ base::span<const base::cstring_view> ChromeURLHosts() {
+       kChromeUIPolicyHost,
+       kChromeUIPredictorsHost,
+       kChromeUIPrefsInternalsHost,
++      kChromeUIPrivyPrivacyHost,
+       kChromeUIProfileInternalsHost,
+       content::kChromeUIQuotaInternalsHost,
+ #if !BUILDFLAG(IS_ANDROID)
+       kChromeUIWebUIToolbarHost,
