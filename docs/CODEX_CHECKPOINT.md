@@ -70,7 +70,7 @@ From a machine with the repository and a Chromium workspace:
 python3 -m py_compile tools/bootstrap.py tools/apply_patches.py \
   tools/configure_build.py tools/build.py
 env PATH="/path/to/depot_tools:$PATH" python3 tools/bootstrap.py \
-  --workspace /path/to/privy-chromium --skip-sync --no-history
+  --workspace /path/to/privy-chromium --skip-sync
 env PATH="/path/to/depot_tools:$PATH" python3 tools/configure_build.py \
   --chromium-src /path/to/privy-chromium/src
 env PATH="/path/to/depot_tools:$PATH" python3 tools/build.py \
